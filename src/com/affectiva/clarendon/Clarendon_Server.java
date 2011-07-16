@@ -12,6 +12,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import com.affectiva.clarendon.network.ClientWorker;
+
 public class Clarendon_Server {
 
 	private static ServerSocket webSocket;
@@ -46,6 +48,60 @@ public class Clarendon_Server {
 	
 			webSocket = new ServerSocket(1030);
 			
+			ClientWorker cw;
+			
+			cw = new ClientWorker(webSocket.accept());
+			
+			Thread _thread = new Thread(cw);
+			_thread.start();
+			
+		} catch (IOException e) {
+			System.out.println(">>> ERROR creating clientSocket on 1030 " + e.getStackTrace() + e.getMessage());
+			System.exit(-1);
+		}
+
+		
+	}
+	
+	private static long calculateKey( String _hash ) 
+	{
+		Pattern pattern = Pattern.compile("\\d");
+		
+		Matcher matcher = pattern.matcher(_hash);
+		
+		String key = "";
+		
+		while( matcher.find() ) {
+			key += matcher.group();
+			System.out.println("??? " + matcher.group());
+			System.out.println("+++ " + key);
+		}
+		
+		System.out.println(">>> matchCount : " + key);
+		
+		pattern = Pattern.compile(" ");
+		matcher = pattern.matcher(_hash);
+		
+		long spcValCount = 0;
+		
+		while( matcher.find() ) {
+			spcValCount++;
+		}
+		
+		System.out.println(">>> spaceCount : " + spcValCount);
+		
+		long hash = Long.parseLong(key) / spcValCount;
+		
+		System.out.println(">>> hash Value : " + hash);
+		
+		return hash;
+	}
+	
+	private void initTestClient()
+	{
+		try {
+			System.out.println(">>> creating server socket...");
+	
 			browserClient = webSocket.accept();
 			
 			System.out.println(">>> browserClient connected...");
@@ -121,9 +177,32 @@ public class Clarendon_Server {
 					outputStream.write(thedigest);
 					outputStream.flush();
 					
-					while (true) {
+					System.out.println(">>> " + in.ready());
+					
+					byte ack[] = new byte[9];
+					browserClient.getInputStream().read(ack);
 						
+					String rdy = new String(ack);
+						
+					System.out.println("@@@ " + rdy);
+					
+					boolean isReady = false;
+					
+					if (rdy.indexOf("cafebabe")>-1) {
+						System.out.println("+++ Client Connection Ready.");
+						
+						isReady = true;
 					}
+					
+					int openByte = 0x00;
+					int closeByte = 0xFF;
+					
+					String msg = "hello world";
+					
+					outputStream.write(openByte);
+					outputStream.write(msg.getBytes("UTF-8"));
+					outputStream.write(closeByte);
+					
 
 				} catch (NoSuchAlgorithmException e) {
 					System.out.println("!!! ERROR : " + e.getStackTrace());
@@ -136,42 +215,6 @@ public class Clarendon_Server {
 			System.out.println(">>> ERROR creating clientSocket on 1030 " + e.getStackTrace() + e.getMessage());
 			System.exit(-1);
 		}
-
-		
-	}
-	
-	private static long calculateKey( String _hash ) 
-	{
-		Pattern pattern = Pattern.compile("\\d");
-		
-		Matcher matcher = pattern.matcher(_hash);
-		
-		String key = "";
-		
-		while( matcher.find() ) {
-			key += matcher.group();
-			System.out.println("??? " + matcher.group());
-			System.out.println("+++ " + key);
-		}
-		
-		System.out.println(">>> matchCount : " + key);
-		
-		pattern = Pattern.compile(" ");
-		matcher = pattern.matcher(_hash);
-		
-		long spcValCount = 0;
-		
-		while( matcher.find() ) {
-			spcValCount++;
-		}
-		
-		System.out.println(">>> spaceCount : " + spcValCount);
-		
-		long hash = Long.parseLong(key) / spcValCount;
-		
-		System.out.println(">>> hash Value : " + hash);
-		
-		return hash;
 	}
 	
 	private void initSensorSocket()
