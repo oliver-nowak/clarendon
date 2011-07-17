@@ -13,9 +13,12 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 import com.affectiva.clarendon.network.ClientWorker;
+import com.affectiva.clarendon.network.SensorWorker;
 
 public class Clarendon_Server {
 
+	private static boolean isReady = false;
+	
 	private static ServerSocket webSocket;
 	private static ServerSocket dataSocket;
 	
@@ -24,12 +27,7 @@ public class Clarendon_Server {
 	
 	private static BufferedReader sensorData;
 	
-	private static boolean isHandshaking = true;
-	
-	private static String sample;
-	
-	private static String connectionRequest = "";
-	
+	private static String data = "";
 	
 	private static String handshake = "HTTP/1.1 101 WebSocket Protocol Handshake\r\n" +
 									  "Upgrade: WebSocket\r\n" +
@@ -43,24 +41,18 @@ public class Clarendon_Server {
 	public static void main(String[] args) 
 	{
 		
-		try {
-			System.out.println(">>> creating server socket...");
-	
-			webSocket = new ServerSocket(1030);
-			
-			ClientWorker cw;
-			
-			cw = new ClientWorker(webSocket.accept());
-			
-			Thread _thread = new Thread(cw);
-			_thread.start();
-			
-		} catch (IOException e) {
-			System.out.println(">>> ERROR creating clientSocket on 1030 " + e.getStackTrace() + e.getMessage());
-			System.exit(-1);
-		}
-
+		ThreadManager threadManager = new ThreadManager();
 		
+		threadManager.connectSensor();
+		threadManager.connectClient();
+		
+		while(true) {
+			
+			
+			threadManager.transfer();
+			
+			
+		}
 	}
 	
 	private static long calculateKey( String _hash ) 
@@ -232,7 +224,7 @@ public class Clarendon_Server {
 				int c;
 				byte buffer[] = new byte[80]; // 56 too small
 				ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
-				String data;
+//				String data;
 				
 				System.out.println(">>> preparing to write capture data...");
 				while( true ) {
@@ -243,8 +235,10 @@ public class Clarendon_Server {
 							break;
 							
 						case 81: // Q TERMINATE STRING
-							data = new String(byteBuffer.array());
-							System.out.println( data );
+							synchronized(this) {
+								data = new String(byteBuffer.array());
+							}
+//							System.out.println( data );
 							byteBuffer.clear();
 							break;
 							
