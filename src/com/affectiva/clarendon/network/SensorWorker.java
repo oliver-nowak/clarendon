@@ -14,8 +14,6 @@ public class SensorWorker implements Runnable {
 	
 	public volatile String data = "";
 	
-//	public String testData = "helloworld";
-	
 	public SensorWorker(Socket _sensor) 
 	{
 		System.out.println("+++ creating SensorWorker thread...");
@@ -32,10 +30,6 @@ public class SensorWorker implements Runnable {
 		
 	}
 	
-//	public synchronized String getData()
-//	{
-//		return data;
-//	}
 
 	@Override
 	public void run() 
@@ -43,17 +37,11 @@ public class SensorWorker implements Runnable {
 		int c;
 		byte buffer[] = new byte[80]; // 56 too small
 		ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
-//		String data;
 		
 		try {
 			System.out.println(">>> preparing to write capture data...");
 			
 			while( true ) {
-				
-//					synchronized(this) {
-//						System.out.println("mau");
-//						testData = "not here";
-//					}
 					
 					c = in.read();
 					
@@ -62,11 +50,8 @@ public class SensorWorker implements Runnable {
 						break;
 						
 					case 81: // Q TERMINATE STRING
-//						synchronized(this) {
-							data = new String(byteBuffer.array());
-//							testData = "not here";
-//						}
-//						System.out.println( data );
+						data = new String(byteBuffer.array());
+						
 						byteBuffer.clear();
 						
 						try {

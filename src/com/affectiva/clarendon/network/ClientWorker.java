@@ -37,10 +37,6 @@ public class ClientWorker implements Runnable {
 		
 		sw = _sw;
 		
-//		streamData = _data;
-		
-//		streamData = "hello world";
-		
 		try {
 			in = new BufferedReader( new InputStreamReader(client.getInputStream()) );
 			outputStream = new DataOutputStream( client.getOutputStream() );
@@ -48,13 +44,13 @@ public class ClientWorker implements Runnable {
 		} catch (IOException e) {
 			System.out.println("!!! ERROR " + e.getMessage() + " : " + e.getStackTrace() );
 		}
-		
-		
 	}
 	
 	@Override
 	public void run() 
 	{
+		//TODO: add check for packet dupes
+		
 		boolean isReady = validateHandshake();
 		
 		System.out.println("+++ preparing to write to socket...");
@@ -62,10 +58,9 @@ public class ClientWorker implements Runnable {
 		int openByte = 0x00;
 		int closeByte = 0xFF;
 		
-//		String msg = "hello world";
 //		try {
 			
-			while (true) {
+			while (isReady) {
 				
 				if (sw != null) {
 					System.out.println( sw.data );
@@ -77,9 +72,6 @@ public class ClientWorker implements Runnable {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-//				synchronized(this) {
-//					System.out.println( streamData );
-//				}
 			}
 //			outputStream.write(openByte);
 //			outputStream.write(msg.getBytes("UTF-8"));
@@ -90,7 +82,7 @@ public class ClientWorker implements Runnable {
 //			System.out.println("!!! ERROR " + e.getMessage() + " : " + e.getStackTrace() );
 //		}
 
-//		System.out.println("!!! ClientWorker thread dying...");
+		System.out.println("!!! ClientWorker thread dying...");
 	}
 	
 	private boolean validateHandshake()
@@ -124,8 +116,6 @@ public class ClientWorker implements Runnable {
 				byte key_3[] = new byte[8];
 				key_3 = key_chunk3.getBytes();
 				
-//				System.out.println(">>> bytes len : " + key_chunk3.getBytes().length);
-				
 				Long k1 = key_1;
 				Long k2 = key_2;
 				
@@ -136,9 +126,6 @@ public class ClientWorker implements Runnable {
 				bb.putInt(k_1);
 				bb.putInt(k_2);
 				bb.put(key_3);
-				
-//				System.out.println("bb size : " + bb.array().length);
-				
 
 				byte[] thedigest;
 				
@@ -148,22 +135,16 @@ public class ClientWorker implements Runnable {
 					md = MessageDigest.getInstance("MD5");
 					thedigest = md.digest( bb.array() );
 					
-//					System.out.println("sizeof thedigest : " + thedigest.length);
-					
 					byte response[] = handshake.getBytes("UTF-8");
 					
 					outputStream.write(response);
 					outputStream.write(thedigest);
 					outputStream.flush();
 					
-//					System.out.println(">>> " + in.ready());
-					
 					byte ack[] = new byte[9];
 					client.getInputStream().read(ack);
 						
 					String rdy = new String(ack);
-						
-					System.out.println("@@@ " + rdy);
 					
 					if (rdy.indexOf("cafebabe")>-1) {
 						System.out.println("+++ Client Connection Ready.");
@@ -195,11 +176,7 @@ public class ClientWorker implements Runnable {
 		
 		while( matcher.find() ) {
 			key += matcher.group();
-//			System.out.println("??? " + matcher.group());
-//			System.out.println("+++ " + key);
 		}
-		
-//		System.out.println(">>> matchCount : " + key);
 		
 		pattern = Pattern.compile(" ");
 		matcher = pattern.matcher(_hash);
@@ -210,13 +187,8 @@ public class ClientWorker implements Runnable {
 			spcValCount++;
 		}
 		
-//		System.out.println(">>> spaceCount : " + spcValCount);
-		
 		long hash = Long.parseLong(key) / spcValCount;
-		
-//		System.out.println(">>> hash Value : " + hash);
 		
 		return hash;
 	}
-
 }

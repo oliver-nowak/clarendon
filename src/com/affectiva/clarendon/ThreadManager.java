@@ -8,16 +8,11 @@ import com.affectiva.clarendon.network.SensorWorker;
 
 public class ThreadManager {
 
-	private static boolean isReady = false;
-	
 	private ServerSocket webSocket;
 	private ServerSocket dataSocket;
 	
 	private ClientWorker cw;
-	SensorWorker sw;
-	
-	private volatile String data = "";
-	
+	private SensorWorker sw;
 	
 	public ThreadManager() {
 		try {
@@ -25,8 +20,6 @@ public class ThreadManager {
 	
 			webSocket = new ServerSocket(1030);
 			dataSocket = new ServerSocket(1031);
-
-			isReady = true;
 		} 
 		catch (IOException e) {
 			System.out.println(">>> ERROR creating clientSocket on 1030 " + e.getStackTrace() + e.getMessage());
@@ -43,14 +36,10 @@ public class ThreadManager {
 	public synchronized void connectClient()
 	{
 		System.out.println("+++ Waiting for client socket...");
-		
-//		ClientWorker cw;
-		
+
 		try {
 			cw = new ClientWorker(webSocket.accept(), sw);
-			
-//			cw.streamData = data;
-			
+
 			Thread _thread = new Thread(cw);
 			_thread.start();
 			
@@ -65,12 +54,9 @@ public class ThreadManager {
 	{
 		System.out.println("+++ Waiting for data socket...");
 		
-//		SensorWorker sw;
 		try {
 			sw = new SensorWorker(dataSocket.accept());
-			
-//			data = sw.testData;
-			
+
 			Thread _sensorThread = new Thread(sw);
 			_sensorThread.start();
 			
