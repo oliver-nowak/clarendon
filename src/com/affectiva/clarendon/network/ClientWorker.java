@@ -83,7 +83,8 @@ public class ClientWorker implements Runnable {
 						
 						
 						outputStream.write(openByte);
-						outputStream.write(eda.getBytes("UTF-8"));
+//						outputStream.write(eda.getBytes("UTF-8"));
+						outputStream.write(eda.getBytes());
 //						outputStream.writeFloat(fEda);
 						outputStream.write(closeByte);
 						
@@ -93,7 +94,7 @@ public class ClientWorker implements Runnable {
 				}
 				
 //				try {
-				Thread.sleep(125);
+				Thread.sleep(60);
 //				} 
 //				catch (InterruptedException e) {
 //					 TODO Auto-generated catch block

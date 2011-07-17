@@ -57,7 +57,7 @@ public class SensorWorker implements Runnable {
 						byteBuffer.clear();
 						
 //						try {
-						Thread.sleep(125);
+						Thread.sleep(60);
 //						} 
 						
 						break;
