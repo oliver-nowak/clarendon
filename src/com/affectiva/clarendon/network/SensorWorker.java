@@ -34,16 +34,16 @@ public class SensorWorker implements Runnable {
 	@Override
 	public void run() 
 	{
-		//TODO: add check for Nemo socket close
-		
 		int c;
 		byte buffer[] = new byte[80]; // 56 too small
 		ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
 		
+		boolean isReady = true;
+		
 		try {
 			System.out.println(">>> preparing to write capture data...");
 			
-			while( true ) {
+			while( isReady ) {
 					
 					c = in.read();
 					
@@ -54,12 +54,20 @@ public class SensorWorker implements Runnable {
 					case 81: // Q TERMINATE STRING
 						data = new String(byteBuffer.array());
 						
+						if (data.indexOf("1313")>-1) {
+							System.out.println("!!! Data Socket requested CLOSE event...");
+							data = "1313";
+							
+							Thread.sleep(30);
+							
+							sensor.close();
+							isReady = false;
+						}
+						
 						byteBuffer.clear();
-						
-//						try {
+
 						Thread.sleep(60);
-//						} 
-						
+
 						break;
 						
 						default:
@@ -75,6 +83,8 @@ public class SensorWorker implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		System.out.println("!!! SensorWorker thread dying...");
 	}
 
 }

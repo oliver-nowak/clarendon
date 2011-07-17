@@ -54,9 +54,6 @@ public class ClientWorker implements Runnable {
 	@Override
 	public void run() 
 	{
-
-		//TODO: add check for browser socket close
-		
 		boolean isReady = validateHandshake();
 		
 		System.out.println("+++ preparing to write to socket...");
@@ -69,37 +66,49 @@ public class ClientWorker implements Runnable {
 			while (isReady) {
 				
 				if (sw != null) {
-//					System.out.println( sw.data );
 					
-					fields = sw.data.split(",");
-					currPacket = fields[0];
-					
-					if (currPacket != prevPacket) {
+					if (in.ready()) {
+						System.out.println("**** Client Worker Input Stream is ready...");
+						StringBuffer sb = new StringBuffer();
 						
-//						float fEda = Float.parseFloat(fields[6]);
+						while( in.ready() ) {
+							sb.append( (char) in.read() );
+						}
 						
-						eda = fields[6];
-						prevPacket = currPacket;
-						
-						
-						outputStream.write(openByte);
-//						outputStream.write(eda.getBytes("UTF-8"));
-						outputStream.write(eda.getBytes());
-//						outputStream.writeFloat(fEda);
-						outputStream.write(closeByte);
-						
+						if (sb.toString().indexOf("1313") > -1) {
+							System.out.println("*** Browser client requested CLOSE EVENT...");
+							client.close();
+							isReady = false;
+							break;
+						}
 					}
 					
+					if (sw.data.indexOf("1313") > -1) {
+						System.out.println("@@@ Client Worker received CLOSE EVENT...");
+						outputStream.write(closeByte);
+						outputStream.write(openByte);
+						client.close();
+						isReady = false;
+						
+					} else {
+						fields = sw.data.split(",");
+						currPacket = fields[0];
+					
+					
+						if (currPacket != prevPacket) {
+							eda = fields[6];
+							prevPacket = currPacket;
+
+							outputStream.write(openByte);
+							outputStream.write(eda.getBytes());
+							outputStream.write(closeByte);
+							
+						}
+					}
 					
 				}
 				
-//				try {
 				Thread.sleep(60);
-//				} 
-//				catch (InterruptedException e) {
-//					 TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
 			}
 
 		} 

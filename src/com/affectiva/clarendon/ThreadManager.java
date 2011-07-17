@@ -14,6 +14,8 @@ public class ThreadManager {
 	private ClientWorker cw;
 	private SensorWorker sw;
 	
+	public Thread sensorThread;
+	
 	public ThreadManager() {
 		try {
 			System.out.println(">>> creating server socket...");
@@ -27,9 +29,15 @@ public class ThreadManager {
 		} 
 	}
 	
-	public synchronized void transfer()
+	public synchronized boolean sensorStatus()
 	{
-		cw.streamData = sw.data;
+		if (sensorThread == null) {
+			return false;
+		}
+		else if (sensorThread != null) {
+			return sensorThread.isAlive();
+		}
+		return false;
 	}
 	
 	
@@ -38,10 +46,20 @@ public class ThreadManager {
 		System.out.println("+++ Waiting for client socket...");
 
 		try {
-			cw = new ClientWorker(webSocket.accept(), sw);
-
-			Thread _thread = new Thread(cw);
-			_thread.start();
+			
+			while (true) {
+				System.out.println("+++ SENSOR THREAD IS ALIVE? " + sensorThread.isAlive());
+				
+				if (sensorThread != null && !sensorThread.isAlive()) {
+					connectSensor();
+				}
+				
+				cw = new ClientWorker(webSocket.accept(), sw);
+	
+				Thread _thread = new Thread(cw);
+				_thread.start();
+				
+			}
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -55,10 +73,15 @@ public class ThreadManager {
 		System.out.println("+++ Waiting for data socket...");
 		
 		try {
-			sw = new SensorWorker(dataSocket.accept());
-
-			Thread _sensorThread = new Thread(sw);
-			_sensorThread.start();
+//			while ( !sensorThread.isAlive() ) {
+//			while (true) {
+				sw = new SensorWorker(dataSocket.accept());
+	
+				sensorThread = new Thread(sw);
+				sensorThread.start();
+//				Thread _sensorThread = new Thread(sw);
+//				_sensorThread.start(); 
+//			}
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
