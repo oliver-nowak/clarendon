@@ -18,7 +18,7 @@ public class ClientWorker implements Runnable {
 	private BufferedReader in;
 	private DataOutputStream outputStream;
 	
-	public String streamData = "";
+	public volatile String streamData = "";
 	
 	private String handshake = "HTTP/1.1 101 WebSocket Protocol Handshake\r\n" +
 			  "Upgrade: WebSocket\r\n" +
@@ -26,13 +26,18 @@ public class ClientWorker implements Runnable {
 			  "Sec-WebSocket-Origin: http://127.0.0.1\r\n" +
 			  "Sec-WebSocket-Location: ws://127.0.0.1:1030/\r\n\r\n";
 
+	private SensorWorker sw;
 	
 	
-	public ClientWorker(Socket _client) 
+	public ClientWorker(Socket _client, SensorWorker _sw) 
 	{
 		System.out.println("+++ creating ClientWorker thread...");
 		
 		client = _client;
+		
+		sw = _sw;
+		
+//		streamData = _data;
 		
 //		streamData = "hello world";
 		
@@ -61,9 +66,20 @@ public class ClientWorker implements Runnable {
 //		try {
 			
 			while (true) {
-				synchronized(this) {
-					System.out.println( streamData );
+				
+				if (sw != null) {
+					System.out.println( sw.data );
 				}
+				
+				try {
+					Thread.sleep(125);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+//				synchronized(this) {
+//					System.out.println( streamData );
+//				}
 			}
 //			outputStream.write(openByte);
 //			outputStream.write(msg.getBytes("UTF-8"));

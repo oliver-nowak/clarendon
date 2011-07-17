@@ -46,13 +46,13 @@ public class Clarendon_Server {
 		threadManager.connectSensor();
 		threadManager.connectClient();
 		
-		while(true) {
+//		while(true) {
 			
 			
-			threadManager.transfer();
+//			threadManager.transfer();
 			
 			
-		}
+//		}
 	}
 	
 	private static long calculateKey( String _hash ) 

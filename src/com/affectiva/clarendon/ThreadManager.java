@@ -16,7 +16,7 @@ public class ThreadManager {
 	private ClientWorker cw;
 	SensorWorker sw;
 	
-	private String data = "";
+	private volatile String data = "";
 	
 	
 	public ThreadManager() {
@@ -47,9 +47,9 @@ public class ThreadManager {
 //		ClientWorker cw;
 		
 		try {
-			cw = new ClientWorker(webSocket.accept());
+			cw = new ClientWorker(webSocket.accept(), sw);
 			
-			cw.streamData = data;
+//			cw.streamData = data;
 			
 			Thread _thread = new Thread(cw);
 			_thread.start();
@@ -69,7 +69,7 @@ public class ThreadManager {
 		try {
 			sw = new SensorWorker(dataSocket.accept());
 			
-			data = sw.testData;
+//			data = sw.testData;
 			
 			Thread _sensorThread = new Thread(sw);
 			_sensorThread.start();

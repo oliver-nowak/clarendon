@@ -12,9 +12,9 @@ public class SensorWorker implements Runnable {
 	
 	private BufferedReader in;
 	
-	public String data = "";
+	public volatile String data = "";
 	
-	public String testData = "helloworld";
+//	public String testData = "helloworld";
 	
 	public SensorWorker(Socket _sensor) 
 	{
@@ -62,12 +62,19 @@ public class SensorWorker implements Runnable {
 						break;
 						
 					case 81: // Q TERMINATE STRING
-						synchronized(this) {
+//						synchronized(this) {
 							data = new String(byteBuffer.array());
 //							testData = "not here";
-						}
+//						}
 //						System.out.println( data );
 						byteBuffer.clear();
+						
+						try {
+							Thread.sleep(125);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 						break;
 						
 						default:
