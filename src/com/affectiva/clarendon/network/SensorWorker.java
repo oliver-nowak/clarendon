@@ -34,6 +34,8 @@ public class SensorWorker implements Runnable {
 	@Override
 	public void run() 
 	{
+		//TODO: add check for Nemo socket close
+		
 		int c;
 		byte buffer[] = new byte[80]; // 56 too small
 		ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
@@ -54,12 +56,10 @@ public class SensorWorker implements Runnable {
 						
 						byteBuffer.clear();
 						
-						try {
-							Thread.sleep(125);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+//						try {
+						Thread.sleep(125);
+//						} 
+						
 						break;
 						
 						default:
@@ -70,6 +70,10 @@ public class SensorWorker implements Runnable {
 		}
 		catch (IOException e) {
 			System.out.println(">>> ERROR creating clientSocket on 1030 " + e.getStackTrace() + e.getMessage());
+		}
+		catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

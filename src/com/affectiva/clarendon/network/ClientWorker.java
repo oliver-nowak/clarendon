@@ -20,6 +20,11 @@ public class ClientWorker implements Runnable {
 	
 	public volatile String streamData = "";
 	
+	private String fields[]	= new String[8];
+	private String prevPacket = "";
+	private String currPacket = "";
+	private String eda = "";
+	
 	private String handshake = "HTTP/1.1 101 WebSocket Protocol Handshake\r\n" +
 			  "Upgrade: WebSocket\r\n" +
 			  "Connection: Upgrade\r\n" +
@@ -49,7 +54,8 @@ public class ClientWorker implements Runnable {
 	@Override
 	public void run() 
 	{
-		//TODO: add check for packet dupes
+
+		//TODO: add check for browser socket close
 		
 		boolean isReady = validateHandshake();
 		
@@ -58,29 +64,51 @@ public class ClientWorker implements Runnable {
 		int openByte = 0x00;
 		int closeByte = 0xFF;
 		
-//		try {
+		try {
 			
 			while (isReady) {
 				
 				if (sw != null) {
-					System.out.println( sw.data );
+//					System.out.println( sw.data );
+					
+					fields = sw.data.split(",");
+					currPacket = fields[0];
+					
+					if (currPacket != prevPacket) {
+						
+//						float fEda = Float.parseFloat(fields[6]);
+						
+						eda = fields[6];
+						prevPacket = currPacket;
+						
+						
+						outputStream.write(openByte);
+						outputStream.write(eda.getBytes("UTF-8"));
+//						outputStream.writeFloat(fEda);
+						outputStream.write(closeByte);
+						
+					}
+					
+					
 				}
 				
-				try {
-					Thread.sleep(125);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//				try {
+				Thread.sleep(125);
+//				} 
+//				catch (InterruptedException e) {
+//					 TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 			}
-//			outputStream.write(openByte);
-//			outputStream.write(msg.getBytes("UTF-8"));
-//				outputStream.write(streamData.getBytes("UTF-8"));
-//			outputStream.write(closeByte);
-//		} 
-//		catch(IOException e) {
-//			System.out.println("!!! ERROR " + e.getMessage() + " : " + e.getStackTrace() );
-//		}
+
+		} 
+		catch(IOException e) {
+			System.out.println("!!! ERROR " + e.getMessage() + " : " + e.getStackTrace() );
+		}
+		catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		System.out.println("!!! ClientWorker thread dying...");
 	}
@@ -89,6 +117,13 @@ public class ClientWorker implements Runnable {
 	{
 		try {
 			System.out.println("+++ reading connection request headers..." + in.ready());
+			
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			
 			StringBuffer sb = new StringBuffer();
 			String fields[] = new String[9];
