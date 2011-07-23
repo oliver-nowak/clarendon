@@ -10,7 +10,6 @@
 	var data = new Array();
 	var web_socket = null;
 	
-	//var max_range = parseInt(200 * .8);
 	var max_range=200.000 * 0.800;
 	var peak = 1.000;
 	
@@ -21,35 +20,19 @@
 	}
 
 	function update() {		
-		// FIX: this results in memory leak
-
 		var data_array = [];
 		var data_length = data.length;
 
 		if (data_length >= 800 ) {
-		//if (data.length >= 800) { 
-
 			data_array = data.slice( data_length-800, data_length-1);
-		//	data.shift(); 
-			
-		//	if (data[0]  == peak) {
-		//		peak = 1.000;
-		//		for (var i = 1; i < 800; i++) {
-		//			var newPeak = data[i];
-		//			if ( newPeak > peak) {
-		//				peak = newPeak;
-		//			}
-		//		}
-		//	}
 		} else {
 			data_array = data;
 		}
-		
 			
 		data_length = data_array.length-1;
-		
 
 		var graph_canvas = document.getElementById('graph');
+
 		// clears canvas for chrome
 		graph_canvas.width = 0;
 		graph_canvas.width = 800;
@@ -57,13 +40,10 @@
 		var graph_context = graph_canvas.getContext('2d');
 
 		var pointer = 0;
-		//var datLen = data.length - 1;
-		//var datLen = data_length;
 		
 		if (data_length >= 0) {
 			pointer = data_length;
 		}
-		//var pointer = data.length - 1;
 				
 		// clears canvas for safari
 		graph_context.clearRect(0,0, 800, 200);
@@ -73,30 +53,17 @@
 
 		graph_context.beginPath();
 		
-		//var peak = 0;
 		var scalar = max_range / peak;
-		//var data_point = 0;
 		
-		//scalar = 10; //max_range / peak;
-
 		for (var x = 799; x > 0; x--) {
-		//for (var x = 800; x > 0; x--) {
-		//	var data_point = data[pointer];
-			
 			var data_point = data_array[ pointer ];	
 
 			if (data_point > peak) {
 				peak = data_point;
 			}
 			
-			
-			//var data_value = data[pointer] * 20;
-			//var data_value = data_point * scalar
-			//var data_height = 200 - data_value;
-			//var data_height = 200 - (data_point * scalar);
 			graph_context.moveTo(x, 200);
 			graph_context.lineTo( x, 200 - (data_point * scalar) )
-			//graph_context.lineTo(x, data_height);
 			
 			pointer--;
 
@@ -111,9 +78,8 @@
 	
 	// only works when func is a closure...
 	$(window).bind("beforeunload", function() { 
-    	//alert("leavin...");
-	//	web_socket.send('1313');
-    	//	web_socket.close();
+		web_socket.send('1313');
+    		web_socket.close();
 	})
 	
 	$(document).ready(function() {
@@ -135,14 +101,7 @@
 			}
 		
 			ws.onmessage = function(e) {
-				//alert(e.data);
 				var payload = parseFloat(e.data);
-				//console.log(payload);
-				//console.log(e.data);
-				//data.push(payload);
-				//var payload = e.data;
-				//data.push( parseFloat(e.data) );
-				//data.push( (e.data) );
 				data.push( payload );
 			}
 		
