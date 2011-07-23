@@ -47,7 +47,7 @@ public class ClientWorker implements Runnable {
 			outputStream = new DataOutputStream( client.getOutputStream() );
 			
 		} catch (IOException e) {
-			System.out.println("!!! ERROR " + e.getMessage() + " : " + e.getStackTrace() );
+			System.out.println("!!! ERROR [1] " + e.getMessage() + " : " + e.getStackTrace() );
 		}
 	}
 	
@@ -68,7 +68,7 @@ public class ClientWorker implements Runnable {
 				if (sw != null) {
 					
 					if (in.ready()) {
-						System.out.println("**** Client Worker Input Stream is ready...");
+						System.out.println("+++ Client Worker Input Stream is ready...");
 						StringBuffer sb = new StringBuffer();
 						
 						while( in.ready() ) {
@@ -76,7 +76,7 @@ public class ClientWorker implements Runnable {
 						}
 						
 						if (sb.toString().indexOf("1313") > -1) {
-							System.out.println("*** Browser client requested CLOSE EVENT...");
+							System.out.println("+++ Browser client requested CLOSE EVENT...");
 							client.close();
 							isReady = false;
 							break;
@@ -84,7 +84,7 @@ public class ClientWorker implements Runnable {
 					}
 					
 					if (sw.data.indexOf("1313") > -1) {
-						System.out.println("@@@ Client Worker received CLOSE EVENT...");
+						System.out.println("+++ Client Worker received CLOSE EVENT...");
 						outputStream.write(closeByte);
 						outputStream.write(openByte);
 						client.close();
@@ -113,7 +113,7 @@ public class ClientWorker implements Runnable {
 
 		} 
 		catch(IOException e) {
-			System.out.println("!!! ERROR " + e.getMessage() + " : " + e.getStackTrace() );
+			System.out.println("!!! ERROR [2] " + e.getMessage() + " : " + e.getStackTrace() );
 		}
 		catch (InterruptedException e) {
 			// TODO Auto-generated catch block
