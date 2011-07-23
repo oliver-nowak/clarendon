@@ -28,8 +28,10 @@ public class ClientWorker implements Runnable {
 	private String handshake = "HTTP/1.1 101 WebSocket Protocol Handshake\r\n" +
 			  "Upgrade: WebSocket\r\n" +
 			  "Connection: Upgrade\r\n" +
-			  "Sec-WebSocket-Origin: http://127.0.0.1\r\n" +
-			  "Sec-WebSocket-Location: ws://127.0.0.1:1030/\r\n\r\n";
+//			  "Sec-WebSocket-Origin: http://127.0.0.1\r\n" +
+//			  "Sec-WebSocket-Location: ws://127.0.0.1:1030/\r\n\r\n";
+			  "Sec-WebSocket-Origin: http://labs.qa.affectiva.com\r\n" +
+			  "Sec-WebSocket-Location: ws://labs.qa.affectiva.com:1030/\r\n\r\n";
 
 	private SensorWorker sw;
 	
@@ -56,7 +58,7 @@ public class ClientWorker implements Runnable {
 	{
 		boolean isReady = validateHandshake();
 		
-		System.out.println("+++ preparing to write to socket...");
+		System.out.println("+++ preparing to write to socket...isValidHandshake? " + isReady);
 		
 		int openByte = 0x00;
 		int closeByte = 0xFF;
@@ -129,7 +131,10 @@ public class ClientWorker implements Runnable {
 			System.out.println("+++ reading connection request headers..." + in.ready());
 			
 			try {
-				Thread.sleep(200);
+				while( !in.ready() ) {
+					System.out.println("!!! input not ready yet...");
+					Thread.sleep(200);
+				}
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -182,14 +187,43 @@ public class ClientWorker implements Runnable {
 					
 					byte response[] = handshake.getBytes("UTF-8");
 					
-					outputStream.write(response);
-					outputStream.write(thedigest);
+					byte test[] = new byte[ response.length + thedigest.length];
+					
+					int count = 0;
+					for (int i = 0; i < response.length; i++) {
+						test[count] = response[i];
+						count++;
+					}
+					
+					for (int j = 0; j < thedigest.length; j++) {
+						test[count] = thedigest[j];
+						count++;
+					}
+					
+					outputStream.write(test);
+					
+//					outputStream.write(response);
+//					outputStream.writeUTF(handshake);
+//					outputStream.write(0x0D);
+//					outputStream.write(0x0A);
+					
+//					System.out.println(new String(response));
+					
+//					outputStream.write(thedigest);
+					
+//					System.out.println(new String(thedigest));
+//					System.out.println("leng : " + thedigest.length);
+					
 					outputStream.flush();
+					
+					System.out.println("+++ flushing handshake response...");
 					
 					byte ack[] = new byte[9];
 					client.getInputStream().read(ack);
 						
 					String rdy = new String(ack);
+					
+					System.out.println("+++ client rdy ? " + rdy);
 					
 					if (rdy.indexOf("cafebabe")>-1) {
 						System.out.println("+++ Client Connection Ready.");
