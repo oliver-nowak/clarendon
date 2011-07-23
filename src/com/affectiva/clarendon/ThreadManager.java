@@ -11,7 +11,6 @@ public class ThreadManager {
 	private ServerSocket webSocket;
 	private ServerSocket dataSocket;
 	
-//	private ClientWorker cw;
 	private SensorWorker sw;
 	
 	public Thread sensorThread;
@@ -75,16 +74,9 @@ public class ThreadManager {
 	{
 		System.out.println(">>> creating sensor thread...");
 		
-		//			while ( !sensorThread.isAlive() ) {
-		//			while (true) {
-						sw = new SensorWorker(dataSocket);
-			
-						sensorThread = new Thread(sw);
-						sensorThread.start();
-		//				Thread _sensorThread = new Thread(sw);
-		//				_sensorThread.start(); 
-		//			}
-		
-	}
+		sw = new SensorWorker(dataSocket);
 
+		sensorThread = new Thread(sw);
+		sensorThread.start();
+	}
 }

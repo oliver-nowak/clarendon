@@ -21,16 +21,6 @@ public class SensorWorker implements Runnable {
 		System.out.println("+++ creating SensorWorker thread...");
 		
 		serverSocket = _serverSocket;
-//		sensor = _sensor;
-		
-//		try {
-//			in = new BufferedReader( new InputStreamReader(sensor.getInputStream()) );
-//		}
-//		catch(IOException e) {
-//			System.out.println(">>> ERROR creating clientSocket on 1030 " + e.getStackTrace() + e.getMessage());
-//			System.exit(-1);
-//		}
-		
 	}
 	
 
