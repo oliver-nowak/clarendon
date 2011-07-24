@@ -65,7 +65,7 @@ public class ClientWorker implements Runnable {
 		
 		try {
 			
-			while (isReady) {
+			while (true) {
 				
 				if (sw != null) {
 					
@@ -166,6 +166,10 @@ public class ClientWorker implements Runnable {
 				byte key_3[] = new byte[8];
 				key_3 = key_chunk3.getBytes();
 				
+				for (int q = 0; q < key_3.length; q++) {
+					System.out.println( Integer.toHexString( key_3[q]) );
+				}
+				
 				Long k1 = key_1;
 				Long k2 = key_2;
 				
@@ -198,7 +202,10 @@ public class ClientWorker implements Runnable {
 					for (int j = 0; j < thedigest.length; j++) {
 						test[count] = thedigest[j];
 						count++;
+						
+						System.out.printf("0x%02X", thedigest[j]);
 					}
+					
 					
 					outputStream.write(test);
 					
@@ -217,6 +224,13 @@ public class ClientWorker implements Runnable {
 					outputStream.flush();
 					
 					System.out.println("+++ flushing handshake response...");
+					
+//					try {
+//						Thread.sleep(50);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
 					
 					byte ack[] = new byte[9];
 					client.getInputStream().read(ack);
