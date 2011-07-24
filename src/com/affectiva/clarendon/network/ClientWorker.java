@@ -140,21 +140,67 @@ public class ClientWorker implements Runnable {
 				e1.printStackTrace();
 			}
 			
-			StringBuffer sb = new StringBuffer();
+//			StringBuffer sb = new StringBuffer();
 			String fields[] = new String[9];
 			
-			while( in.ready() ) {
-				sb.append( (char) in.read() );
+			int bytesAvail = client.getInputStream().available();
+			
+			byte[] qq = new byte[bytesAvail];
+			
+			System.out.println("AVAIL " + bytesAvail);
+			
+			int num = client.getInputStream().read(qq);
+			
+			System.out.println("NUM READ " + num);
+			
+			
+			byte[] therest = new byte[bytesAvail-8];
+			System.out.println("therest " + therest.length);
+			
+			byte[] ky_3 = new byte[8];
+			System.out.println("ky_3 " + ky_3.length);
+			
+			System.out.println("TOTAL " + (therest.length + ky_3.length));
+			
+			for (int y = 0; y < therest.length; y++) {
+				therest[y] = qq[y];
 			}
 			
-			System.out.println("+++ Received connection request: \r\n" + sb.toString());
+			int ind = 0;
+			for (int a = qq.length-8; a < qq.length; a++) {
+				ky_3[ind] = qq[a];
+				ind++;
+			}
 			
-			String header = sb.toString();
+			String header = new String(therest);
+			
+//			System.out.println("REQ \n" + header);
+			
+//			int pointer = therest.length - 8;
+			
+			for (int x = 0; x < ky_3.length; x++) {
+//				ky_3[x] = therest[pointer + x];
+				System.out.printf("0x%02X", ky_3[x]);
+			}
+			
+			
+//			
+//			while( in.ready() ) {
+//				sb.append( (char) in.read() );
+//				
+//			}
+			
+			System.out.println("+++ Received connection request: \r\n" + header);
+			
+//			String header = sb.toString();
 			
 			fields = header.split("\r\n");
 			
-			if (fields.length >= 8) {
+			System.out.println("# fields " + fields.length);
+			
+			if (fields.length >= 7) {
 				String key_chunk1 = (String) fields[5];
+				
 				String key_strip1 = key_chunk1.split(": ")[1];
 				long key_1 = calculateKey(key_strip1);	
 
@@ -162,13 +208,13 @@ public class ClientWorker implements Runnable {
 				String key_strip2 = key_chunk2.split(": ")[1];
 				long key_2 = calculateKey(key_strip2);
 				
-				String key_chunk3 = (String) fields[8];			
-				byte key_3[] = new byte[8];
-				key_3 = key_chunk3.getBytes();
-				
-				for (int q = 0; q < key_3.length; q++) {
-					System.out.println( Integer.toHexString( key_3[q]) );
-				}
+//				String key_chunk3 = (String) fields[8];			
+//				byte key_3[] = new byte[8];
+//				key_3 = key_chunk3.getBytes();
+//				
+//				for (int q = 0; q < key_3.length; q++) {
+//					System.out.println( Integer.toHexString( key_3[q]) );
+//				}
 				
 				Long k1 = key_1;
 				Long k2 = key_2;
@@ -179,7 +225,8 @@ public class ClientWorker implements Runnable {
 				ByteBuffer bb = ByteBuffer.allocate(16);
 				bb.putInt(k_1);
 				bb.putInt(k_2);
-				bb.put(key_3);
+				bb.put(ky_3);
+//				bb.put(key_3);
 
 				byte[] thedigest;
 				
