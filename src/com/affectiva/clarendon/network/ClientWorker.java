@@ -25,6 +25,8 @@ public class ClientWorker implements Runnable {
 	private String currPacket = "";
 	private String eda = "";
 	
+	private static final int KEY_3_LENGTH = 8;
+	
 	private String handshake = "HTTP/1.1 101 WebSocket Protocol Handshake\r\n" +
 			  "Upgrade: WebSocket\r\n" +
 			  "Connection: Upgrade\r\n" +
@@ -65,7 +67,7 @@ public class ClientWorker implements Runnable {
 		
 		try {
 			
-			while (true) {
+			while (isReady) {
 				
 				if (sw != null) {
 					
@@ -140,60 +142,31 @@ public class ClientWorker implements Runnable {
 				e1.printStackTrace();
 			}
 			
-//			StringBuffer sb = new StringBuffer();
-			String fields[] = new String[9];
+			String fields[];
 			
 			int bytesAvail = client.getInputStream().available();
 			
-			byte[] qq = new byte[bytesAvail];
+			byte[] handshakeBytes = new byte[bytesAvail];
 			
-			System.out.println("AVAIL " + bytesAvail);
+			client.getInputStream().read(handshakeBytes);
 			
-			int num = client.getInputStream().read(qq);
+			byte[] handshakeHeader = new byte[bytesAvail - KEY_3_LENGTH];
+			byte[] k_3 = new byte[KEY_3_LENGTH];
 			
-			System.out.println("NUM READ " + num);
-			
-			
-			byte[] therest = new byte[bytesAvail-8];
-			System.out.println("therest " + therest.length);
-			
-			byte[] ky_3 = new byte[8];
-			System.out.println("ky_3 " + ky_3.length);
-			
-			System.out.println("TOTAL " + (therest.length + ky_3.length));
-			
-			for (int y = 0; y < therest.length; y++) {
-				therest[y] = qq[y];
+			for (int i = 0; i < handshakeHeader.length; i++) {
+				handshakeHeader[i] = handshakeBytes[i];
 			}
 			
 			int ind = 0;
-			for (int a = qq.length-8; a < qq.length; a++) {
-				ky_3[ind] = qq[a];
+			for (int j = handshakeBytes.length - KEY_3_LENGTH; j < handshakeBytes.length; j++) {
+				k_3[ind] = handshakeBytes[j];
 				ind++;
 			}
 			
-			String header = new String(therest);
-			
-//			System.out.println("REQ \n" + header);
-			
-//			int pointer = therest.length - 8;
-			
-			for (int x = 0; x < ky_3.length; x++) {
-//				ky_3[x] = therest[pointer + x];
-				System.out.printf("0x%02X", ky_3[x]);
-			}
-			
-			
-//			
-//			while( in.ready() ) {
-//				sb.append( (char) in.read() );
-//				
-//			}
+			String header = new String(handshakeHeader);
 			
 			System.out.println("+++ Received connection request: \r\n" + header);
-			
-//			String header = sb.toString();
-			
+
 			fields = header.split("\r\n");
 			
 			System.out.println("# fields " + fields.length);
@@ -208,79 +181,50 @@ public class ClientWorker implements Runnable {
 				String key_strip2 = key_chunk2.split(": ")[1];
 				long key_2 = calculateKey(key_strip2);
 				
-//				String key_chunk3 = (String) fields[8];			
-//				byte key_3[] = new byte[8];
-//				key_3 = key_chunk3.getBytes();
-//				
-//				for (int q = 0; q < key_3.length; q++) {
-//					System.out.println( Integer.toHexString( key_3[q]) );
-//				}
-				
 				Long k1 = key_1;
 				Long k2 = key_2;
 				
 				int k_1 = k1.intValue();
 				int k_2 = k2.intValue();
 				
-				ByteBuffer bb = ByteBuffer.allocate(16);
-				bb.putInt(k_1);
-				bb.putInt(k_2);
-				bb.put(ky_3);
-//				bb.put(key_3);
+				ByteBuffer byteBuffer = ByteBuffer.allocate(16);
+				byteBuffer.putInt(k_1);
+				byteBuffer.putInt(k_2);
+				byteBuffer.put(k_3);
 
-				byte[] thedigest;
+				byte[] responseKey;
 				
 				MessageDigest md;
 				try {
 					
 					md = MessageDigest.getInstance("MD5");
-					thedigest = md.digest( bb.array() );
+					responseKey = md.digest( byteBuffer.array() );
 					
-					byte response[] = handshake.getBytes("UTF-8");
+					byte responseHeader[] = handshake.getBytes("UTF-8");
 					
-					byte test[] = new byte[ response.length + thedigest.length];
+					byte response[] = new byte[ responseHeader.length + responseKey.length];
 					
-					int count = 0;
-					for (int i = 0; i < response.length; i++) {
-						test[count] = response[i];
-						count++;
+					int bytePointer = 0;
+					for (int i = 0; i < responseHeader.length; i++) {
+						response[bytePointer] = responseHeader[i];
+						bytePointer++;
 					}
 					
-					for (int j = 0; j < thedigest.length; j++) {
-						test[count] = thedigest[j];
-						count++;
-						
-						System.out.printf("0x%02X", thedigest[j]);
-					}
+					for (int j = 0; j < responseKey.length; j++) {
+						response[bytePointer] = responseKey[j];
+						bytePointer++;
+					}					
 					
-					
-					outputStream.write(test);
-					
-//					outputStream.write(response);
-//					outputStream.writeUTF(handshake);
-//					outputStream.write(0x0D);
-//					outputStream.write(0x0A);
-					
-//					System.out.println(new String(response));
-					
-//					outputStream.write(thedigest);
-					
-//					System.out.println(new String(thedigest));
-//					System.out.println("leng : " + thedigest.length);
+					outputStream.write(response);
 					
 					outputStream.flush();
 					
 					System.out.println("+++ flushing handshake response...");
 					
-//					try {
-//						Thread.sleep(50);
-//					} catch (InterruptedException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-					
 					byte ack[] = new byte[9];
-					client.getInputStream().read(ack);
+					int numRead = client.getInputStream().read(ack);
+					
+					System.out.println("NUM READ " + numRead);
 						
 					String rdy = new String(ack);
 					
