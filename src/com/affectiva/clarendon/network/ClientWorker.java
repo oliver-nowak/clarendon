@@ -32,8 +32,8 @@ public class ClientWorker implements Runnable {
 			  "Connection: Upgrade\r\n" +
 //			  "Sec-WebSocket-Origin: http://127.0.0.1\r\n" +
 //			  "Sec-WebSocket-Location: ws://127.0.0.1:1030/\r\n\r\n";
-			  "Sec-WebSocket-Origin: http://labs.qa.affectiva.com\r\n" +
-			  "Sec-WebSocket-Location: ws://labs.qa.affectiva.com:1030/\r\n\r\n";
+			  "Sec-WebSocket-Origin: http://50.16.164.116\r\n" +
+			  "Sec-WebSocket-Location: ws://50.16.164.116:1030/\r\n\r\n";
 
 	private SensorWorker sw;
 	
