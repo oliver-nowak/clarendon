@@ -20,16 +20,17 @@
 	}
 
 	function update() {		
-		var data_array = [];
+		//var data_array = [];
 		var data_length = data.length;
 
 		if (data_length >= 800 ) {
-			data_array = data.slice( data_length-800, data_length-1);
-		} else {
-			data_array = data;
-		}
+			data = data.slice( data_length-800, data_length-1);
+		} 
+		//else {
+		//	data_array = data;
+		//}
 			
-		data_length = data_array.length-1;
+		data_length = data.length-1;
 
 		var graph_canvas = document.getElementById('graph');
 
@@ -56,7 +57,7 @@
 		var scalar = max_range / peak;
 		
 		for (var x = 799; x > 0; x--) {
-			var data_point = data_array[ pointer ];	
+			var data_point = data[ pointer ];	
 
 			if (data_point > peak) {
 				peak = data_point;
