@@ -91,6 +91,7 @@ public class ClientWorker implements Runnable {
 						System.out.println("+++ Client Worker received CLOSE EVENT...");
 						outputStream.write(closeByte);
 						outputStream.write(openByte);
+						outputStream.flush();
 						client.close();
 						isReady = false;
 						
@@ -100,12 +101,15 @@ public class ClientWorker implements Runnable {
 					
 					
 						if (currPacket != prevPacket) {
-							eda = fields[6];
+//							eda = fields[6];
 							prevPacket = currPacket;
 
 							outputStream.write(openByte);
-							outputStream.write(eda.getBytes());
+//							outputStream.write(eda.getBytes());
+							outputStream.write( fields[6].getBytes() );
 							outputStream.write(closeByte);
+							
+							outputStream.flush();
 							
 						}
 					}
