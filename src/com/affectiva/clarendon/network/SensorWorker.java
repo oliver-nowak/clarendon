@@ -32,6 +32,7 @@ public class SensorWorker implements Runnable {
 			int c;
 			byte buffer[] = new byte[80]; // 56 too small
 			ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+			byteBuffer.clear();
 			
 			boolean isReady = true;
 			
@@ -48,7 +49,8 @@ public class SensorWorker implements Runnable {
 				
 				while( isReady ) {
 						
-						c = in.read();
+//						c = in.read();
+						c = sensor.getInputStream().read();
 						
 						switch(c) {
 						case 10:

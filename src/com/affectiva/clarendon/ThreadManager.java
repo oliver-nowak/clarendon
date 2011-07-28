@@ -28,16 +28,16 @@ public class ThreadManager {
 		} 
 	}
 	
-	public synchronized boolean sensorStatus()
-	{
-		if (sensorThread == null) {
-			return false;
-		}
-		else if (sensorThread != null) {
-			return sensorThread.isAlive();
-		}
-		return false;
-	}
+//	public synchronized boolean sensorStatus()
+//	{
+//		if (sensorThread == null) {
+//			return false;
+//		}
+//		else if (sensorThread != null) {
+//			return sensorThread.isAlive();
+//		}
+//		return false;
+//	}
 	
 	
 	public synchronized void connectClient()
