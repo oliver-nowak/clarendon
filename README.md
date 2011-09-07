@@ -1,4 +1,4 @@
-This folder contains python code for the <futura_server>.
+This folder contains java and python code for a multi-threaded HTML5 WebSocket server.
 
 Summary
 ~~~
