@@ -1,4 +1,4 @@
-package com.affectiva.clarendon.network;
+package com.olivernowak.clarendon.network;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -23,7 +23,7 @@ public class ClientWorker implements Runnable {
 	private String fields[]	= new String[8];
 	private String prevPacket = "";
 	private String currPacket = "";
-	private String eda = "";
+	private String data_bytes = "";
 	
 	private static final int KEY_3_LENGTH = 8;
 	
@@ -101,11 +101,9 @@ public class ClientWorker implements Runnable {
 					
 					
 						if (currPacket != prevPacket) {
-//							eda = fields[6];
 							prevPacket = currPacket;
 
 							outputStream.write(openByte);
-//							outputStream.write(eda.getBytes());
 							outputStream.write( fields[6].getBytes() );
 							outputStream.write(closeByte);
 							

@@ -1,4 +1,4 @@
-package com.affectiva.clarendon;
+package com.olivernowak.clarendon;
 
 
 

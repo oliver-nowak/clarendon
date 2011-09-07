@@ -1,10 +1,10 @@
-package com.affectiva.clarendon;
+package com.olivernowak.clarendon;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 
-import com.affectiva.clarendon.network.ClientWorker;
-import com.affectiva.clarendon.network.SensorWorker;
+import com.olivernowak.clarendon.network.ClientWorker;
+import com.olivernowak.clarendon.network.SensorWorker;
 
 public class ThreadManager {
 
@@ -13,7 +13,7 @@ public class ThreadManager {
 	
 	private SensorWorker sw;
 	
-	public Thread sensorThread;
+	public Thread connectionThread;
 	
 	public ThreadManager() {
 		try {
@@ -28,27 +28,15 @@ public class ThreadManager {
 		} 
 	}
 	
-//	public synchronized boolean sensorStatus()
-//	{
-//		if (sensorThread == null) {
-//			return false;
-//		}
-//		else if (sensorThread != null) {
-//			return sensorThread.isAlive();
-//		}
-//		return false;
-//	}
-	
-	
 	public synchronized void connectClient()
 	{
 
 		try {
 			
 			while (true) {
-				System.out.println("+++ SENSOR THREAD IS ALIVE? " + sensorThread.isAlive());
+				System.out.println("+++ SENSOR THREAD IS ALIVE? " + connectionThread.isAlive());
 				
-				if (sensorThread != null && !sensorThread.isAlive()) {
+				if (connectionThread != null && !connectionThread.isAlive()) {
 					connectSensor();
 				}
 				
@@ -76,7 +64,7 @@ public class ThreadManager {
 		
 		sw = new SensorWorker(dataSocket);
 
-		sensorThread = new Thread(sw);
-		sensorThread.start();
+		connectionThread = new Thread(sw);
+		connectionThread.start();
 	}
 }

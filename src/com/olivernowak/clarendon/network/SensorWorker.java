@@ -1,4 +1,4 @@
-package com.affectiva.clarendon.network;
+package com.olivernowak.clarendon.network;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 
 public class SensorWorker implements Runnable {
 
-	private Socket sensor;
+	private Socket connection;
 	private ServerSocket serverSocket;
 	
 	private BufferedReader in;
@@ -41,22 +41,21 @@ public class SensorWorker implements Runnable {
 			try {
 				System.out.println(">>> waiting for sensor connection...");
 				
-				sensor = serverSocket.accept();
+				connection = serverSocket.accept();
 				System.out.println(">>> sensor connected...");
 				
-				in = new BufferedReader( new InputStreamReader(sensor.getInputStream()) );			
+				in = new BufferedReader( new InputStreamReader(connection.getInputStream()) );			
 				System.out.println(">>> grabbing sensor input stream...");
 				
 				while( isReady ) {
-						
-//						c = in.read();
-						c = sensor.getInputStream().read();
+					
+						c = connection.getInputStream().read();
 						
 						switch(c) {
 						case 10:
 							break;
 							
-						case 81: // Q TERMINATE STRING
+						case 81: // TERMINATE STRING
 							data = new String(byteBuffer.array());
 							
 							if (data.indexOf("1313")>-1) {
@@ -65,13 +64,11 @@ public class SensorWorker implements Runnable {
 								
 								Thread.sleep(30);
 								
-								sensor.close();
+								connection.close();
 								isReady = false;
 							}
 							
 							byteBuffer.clear();
-	
-//							Thread.sleep(60);
 	
 							break;
 							
