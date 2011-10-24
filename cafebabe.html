@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="eng">
+	<head>
+		<title>PROJECT FUTURA</title>
+	
+	<!--<script type="text/javascript" src="https://getfirebug.com/firebug-lite.js"></script>-->
+	<script language="Javascript" type="text/javascript" src="./scripts/jquery-1.6.1.min.js"></script>
+	<script language="Javascript" type="text/javascript">
+
+	var data = new Array();
+	var web_socket = null;
+	
+	var max_range=200.000 * 0.800;
+	var peak = 1.000;
+	
+	function start() {
+		console.log("started...");
+		$("#renderStatus").text("Render Mode: Dynamic");
+		$("#go_btn").text("Going.");
+		$("#go_text").text("Stream Socket open.");
+		setInterval("update()", 125);
+	}
+
+	function update() {		
+		//var data_array = [];
+		var data_length = data.length;
+
+		if (data_length >= 800 ) {
+			data = data.slice( data_length-800, data_length-1);
+		} 
+		//else {
+		//	data_array = data;
+		//}
+			
+		data_length = data.length-1;
+
+		var graph_canvas = document.getElementById('graph');
+
+		// clears canvas for chrome
+		graph_canvas.width = 0;
+		graph_canvas.width = 800;
+
+		var graph_context = graph_canvas.getContext('2d');
+
+		var pointer = 0;
+		
+		if (data_length >= 0) {
+			pointer = data_length;
+		}
+				
+		// clears canvas for safari
+		graph_context.clearRect(0,0, 800, 200);
+		
+		graph_context.fillStyle = '#eeeeee'
+		graph_context.fillRect(0,0, 800, 200);
+
+		graph_context.beginPath();
+		
+		var scalar = max_range / peak;
+		
+		for (var x = 799; x > 0; x--) {
+			var data_point = data[ pointer ];	
+
+			if (data_point > peak) {
+				peak = data_point;
+			}
+			
+			graph_context.moveTo(x, 200);
+			graph_context.lineTo( x, 200 - (data_point * scalar) )
+			
+			pointer--;
+
+			if (pointer < 0) {
+				break;
+			}
+		}
+			
+		graph_context.strokeStyle = 'rgba(44,196,255,0.5)';
+		graph_context.stroke();
+	}
+	
+	// only works when func is a closure...
+	$(window).bind("beforeunload", function() { 
+		web_socket.send('1313');
+    		web_socket.close();
+	})
+	
+	$(document).ready(function() {
+		var g_canvas = document.getElementById('graph');
+		var g_context= g_canvas.getContext('2d');
+		g_context.fillStyle = '#eeeeee';
+		g_context.fillRect(0,0, g_canvas.width, g_canvas.height);
+
+		try {		
+			var ws = new WebSocket("ws://50.16.164.116:1030/");
+			//var ws = new WebSocket("ws://127.0.0.1:1030/");
+			
+			ws.onopen = function() {
+				//alert("connected...");
+				$('#status').text('Status: Connected');
+				$('#notice').text("Press the GO button.");
+				ws.send('cafebabe');
+				web_socket = ws;
+			}
+		
+			ws.onmessage = function(e) {
+				var payload = parseFloat(e.data);
+				data.push( payload );
+			}
+		
+			ws.onclose = function() {
+				alert("Connection Closed.");
+				$('#status').text("Status: Closed");
+			}
+		} catch(exception) {
+			alert(exception);
+		}	
+	});
+	</script>
+	</head>
+	<body>
+		<div id="test_title">Project Futura</div>
+		</br>
+		<div id='notice'></div>
+		<div id='status'>Status: Not Connected</div>
+		<div id="renderStatus">Render Mode: Static</div>
+		<canvas width="800" height="200" id="graph" style="border:1px dotted;float:left"></canvas>
+		<button id="go_btn" style="font-size:32px;"type="button" onclick='start()'>Go</button>
+		<div id="go_text" style="font-size:32px">Press 'Go' to open the stream.</div> 
+	</body>	
+</html>
